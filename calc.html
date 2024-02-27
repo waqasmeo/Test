@@ -65,37 +65,37 @@
     // Array to store added products
     let products = [];
     let editingIndex = -1;
-  
+
     $(document).ready(function () {
       $('#addProductBtn').on('click', function () {
         addProduct();
       });
-  
+
       $('#productTableBody').on('click', '.btn-warning', function () {
         const index = $(this).closest('tr').index();
         editProduct(index);
       });
-  
+
       $('#productTableBody').on('click', '.btn-danger', function () {
         const index = $(this).closest('tr').index();
         removeProduct(index);
       });
-  
+
       $('#printProductListBtn').on('click', function () {
         printProductList();
       });
     });
-  
+
     function addProduct() {
       const productName = $('#productName').val();
       const productPrice = parseFloat($('#productPrice').val());
       const productQuantity = parseInt($('#productQuantity').val());
-  
+
       if (!productName || isNaN(productPrice) || isNaN(productQuantity)) {
         alert('Please enter valid product details.');
         return;
       }
-  
+
       if (editingIndex !== -1) {
         // Update the existing product if in edit mode
         products[editingIndex] = {
@@ -112,23 +112,23 @@
           quantity: productQuantity
         });
       }
-  
+
       $('#productForm').trigger('reset');
-  
+
       // Update the product list on the page
       updateProductList();
     }
-  
+
     function updateProductList() {
       const productListContainer = $('#productTableBody');
       const totalPriceElement = $('#totalPrice');
-  
+
       productListContainer.empty();
       let totalPrice = 0;
-  
+
       $.each(products, function (index, product) {
         const productTotal = product.price * product.quantity;
-  
+
         const row = $('<tr>');
         row.html(`
           <td>${product.name}</td>
@@ -140,15 +140,15 @@
             <button type="button" class="btn btn-danger btn-sm">Remove</button>
           </td>
         `);
-  
+
         productListContainer.append(row);
-  
+
         totalPrice += productTotal;
       });
-  
+
       totalPriceElement.text(totalPrice.toFixed(2));
     }
-  
+
     function editProduct(index) {
       const product = products[index];
       $('#productName').val(product.name);
@@ -156,34 +156,96 @@
       $('#productQuantity').val(product.quantity);
       editingIndex = index; // Set editingIndex to the selected index
     }
-  
+
     function removeProduct(index) {
       products.splice(index, 1);
       updateProductList();
     }
-  
+
     function printProductList() {
-      const printWindow = window.open('', '_blank');
-  
-      printWindow.document.write('<html><head><title>Print Product List</title></head><body>');
-      printWindow.document.write('<h1>Product List</h1>');
-  
-      printWindow.document.write('<ol>');
-      $.each(products, function (index, product) {
-        const productTotal = product.price * product.quantity;
-        printWindow.document.write(`<li>${product.name} - Price: $${product.price.toFixed(2)} - Quantity: ${product.quantity} - Total: $${productTotal.toFixed(2)}</li>`);
-      });
-      printWindow.document.write('</ol>');
-  
-      printWindow.document.write(`<p>Total Price: $${$('#totalPrice').text()}</p>`);
-  
-      printWindow.document.write('</body></html>');
-  
-      printWindow.document.close();
-      printWindow.print();
-    }
+  const printWindow = window.open('', '_blank');
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Product List</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+          }
+
+          h1 {
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+
+          th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+          }
+
+          th {
+            background-color: #f2f2f2;
+          }
+        </style>
+      </head>
+      <body>
+  `);
+
+  printWindow.document.write('<h1>Master Nursery Farm</h1>');
+
+  printWindow.document.write(`
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Plants Name</th>
+          <th>Price </th>
+          <th>Quantity</th>
+          <th>Total Price</th>
+        </tr>
+      </thead>
+      <tbody>
+  `);
+
+  $.each(products, function (index, product) {
+    const productTotal = product.price * product.quantity;
+    const serialNumber = index + 1;
+
+    printWindow.document.write(`
+      <tr>
+        <td>${serialNumber}</td>
+        <td>${product.name}</td>
+        <td>$${product.price.toFixed(2)}</td>
+        <td>${product.quantity}</td>
+        <td>$${productTotal.toFixed(2)}</td>
+      </tr>
+    `);
+  });
+
+  printWindow.document.write('</tbody></table>');
+
+  printWindow.document.write(`<p>Total Amount: $${$('#totalPrice').text()}</p>`);
+
+  printWindow.document.write('</body></html>');
+
+  printWindow.document.close();
+  printWindow.print();
+}
+
+
+
   </script>
-  
+
 
 </body>
 
