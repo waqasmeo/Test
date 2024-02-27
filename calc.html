@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Management</title>
+  <!-- Add Bootstrap CSS link -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Add some custom styles if needed */
+    body {
+      padding: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Add Products</h1>
+  <form id="productForm">
+    <div class="mb-3">
+      <label for="productName" class="form-label">Product Name:</label>
+      <input type="text" class="form-control" id="productName" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="productPrice" class="form-label">Product Price:</label>
+      <input type="number" class="form-control" id="productPrice" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="productQuantity" class="form-label">Product Quantity:</label>
+      <input type="number" class="form-control" id="productQuantity" required>
+    </div>
+
+    <button type="button" class="btn btn-primary" onclick="addProduct()">Add Product</button>
+  </form>
+
+  <hr>
+
+  <h1>Product List</h1>
+  <div id="productList" class="table-responsive">
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Total</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody"></tbody>
+    </table>
+  </div>
+  <p>Total Price: $<span id="totalPrice">0.00</span></p>
+
+  <button class="btn btn-secondary" onclick="printProductList()">Print Product List</button>
+
+  <!-- Add Bootstrap JS and Popper.js scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script>
+    // Array to store added products
+    let products = [];
+    let editingIndex = -1;
+  
+    $(document).ready(function () {
+      $('#addProductBtn').on('click', function () {
+        addProduct();
+      });
+  
+      $('#productTableBody').on('click', '.btn-warning', function () {
+        const index = $(this).closest('tr').index();
+        editProduct(index);
+      });
+  
+      $('#productTableBody').on('click', '.btn-danger', function () {
+        const index = $(this).closest('tr').index();
+        removeProduct(index);
+      });
+  
+      $('#printProductListBtn').on('click', function () {
+        printProductList();
+      });
+    });
+  
+    function addProduct() {
+      const productName = $('#productName').val();
+      const productPrice = parseFloat($('#productPrice').val());
+      const productQuantity = parseInt($('#productQuantity').val());
+  
+      if (!productName || isNaN(productPrice) || isNaN(productQuantity)) {
+        alert('Please enter valid product details.');
+        return;
+      }
+  
+      if (editingIndex !== -1) {
+        // Update the existing product if in edit mode
+        products[editingIndex] = {
+          name: productName,
+          price: productPrice,
+          quantity: productQuantity
+        };
+        editingIndex = -1; // Reset editingIndex after updating
+      } else {
+        // Add a new product to the array
+        products.push({
+          name: productName,
+          price: productPrice,
+          quantity: productQuantity
+        });
+      }
+  
+      $('#productForm').trigger('reset');
+  
+      // Update the product list on the page
+      updateProductList();
+    }
+  
+    function updateProductList() {
+      const productListContainer = $('#productTableBody');
+      const totalPriceElement = $('#totalPrice');
+  
+      productListContainer.empty();
+      let totalPrice = 0;
+  
+      $.each(products, function (index, product) {
+        const productTotal = product.price * product.quantity;
+  
+        const row = $('<tr>');
+        row.html(`
+          <td>${product.name}</td>
+          <td>$${product.price.toFixed(2)}</td>
+          <td>${product.quantity}</td>
+          <td>$${productTotal.toFixed(2)}</td>
+          <td>
+            <button type="button" class="btn btn-warning btn-sm">Edit</button>
+            <button type="button" class="btn btn-danger btn-sm">Remove</button>
+          </td>
+        `);
+  
+        productListContainer.append(row);
+  
+        totalPrice += productTotal;
+      });
+  
+      totalPriceElement.text(totalPrice.toFixed(2));
+    }
+  
+    function editProduct(index) {
+      const product = products[index];
+      $('#productName').val(product.name);
+      $('#productPrice').val(product.price);
+      $('#productQuantity').val(product.quantity);
+      editingIndex = index; // Set editingIndex to the selected index
+    }
+  
+    function removeProduct(index) {
+      products.splice(index, 1);
+      updateProductList();
+    }
+  
+    function printProductList() {
+      const printWindow = window.open('', '_blank');
+  
+      printWindow.document.write('<html><head><title>Print Product List</title></head><body>');
+      printWindow.document.write('<h1>Product List</h1>');
+  
+      printWindow.document.write('<ol>');
+      $.each(products, function (index, product) {
+        const productTotal = product.price * product.quantity;
+        printWindow.document.write(`<li>${product.name} - Price: $${product.price.toFixed(2)} - Quantity: ${product.quantity} - Total: $${productTotal.toFixed(2)}</li>`);
+      });
+      printWindow.document.write('</ol>');
+  
+      printWindow.document.write(`<p>Total Price: $${$('#totalPrice').text()}</p>`);
+  
+      printWindow.document.write('</body></html>');
+  
+      printWindow.document.close();
+      printWindow.print();
+    }
+  </script>
+  
+
+</body>
+
+</html>
